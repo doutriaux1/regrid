@@ -16,6 +16,8 @@ else:
 f=cdms2.open(p.input)
 
 fo = cdms2.open(fnmout,"w")
+for a in f.attributes:
+    setattr(fo,a,getattr(f,a))
 
 for v in f.variables.keys():
     V = f(v)

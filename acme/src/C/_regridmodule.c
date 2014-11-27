@@ -26,7 +26,6 @@ static PyObject *
     int nindep=1;
     int i,j;
     for (i=0;i<data->nd-1;i++) {
-      fprintf(stderr,"dim %i has len: %ld\n",i,data->dimensions[i]);
       nindep*=data->dimensions[i];
     }
     /* Construct dest array */
@@ -47,7 +46,6 @@ static PyObject *
     col_vals = (int *) col->data;
     data_vals = (void *) data->data;
     fracb_vals = (double *) fracb->data;
-    fprintf(stderr,"type: %c\n",type);
     #pragma omp parallel for private(j)
     for (i=0;i<nindep;i++) {
       if (type=='d') {

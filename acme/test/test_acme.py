@@ -41,8 +41,8 @@ if not os.path.exists("crap.nc"):
   f.write(ps,id="PS")
 else:
   f=cdms2.open("crap.nc")
-  ps=f("PS",slice(0,12)).filled()
-  ps=ps.astype("l")
+  ps=f("PS").filled()
+  #ps=ps.astype("l")
 print "PS SHAPE:",ps.shape
 
 
@@ -56,7 +56,16 @@ print out.shape
 f=cdms2.open("out.nc","w")
 f.write(out,id="PS",dtype=ps.dtype)
 f.close()
-
-
+fok = "ok_%s.nc" % ps.dtype
+if os.path.exists(fok):
+    f=cdms2.open(fok)
+    ok=f("ok")
+    f.close()
+    d = out-ok
+    print "MIN,MAX:",d.min(),d.max()
+else:
+    f=cdms2.open(fok,"w")
+    f.write(out,id="ok",dtype=ps.dtype)
+    f.close()
 
 

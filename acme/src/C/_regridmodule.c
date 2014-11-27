@@ -12,7 +12,6 @@ static PyObject *
   char type;
   void *data_vals;
   double *out;
-#pragma omp parallel
 
   if (!PyArg_ParseTuple(args,"OOOOO",&data_obj,&S_obj,&row_obj,&col_obj,&fracb_obj))
     return NULL;
@@ -36,6 +35,7 @@ static PyObject *
     newdims[0]=nindep;
     newdims[1] = n2;
     out=malloc(newdims[0]*newdims[1]*sizeof(double));
+    #pragma omp parallel for
     for (j=0;j<newdims[0]*newdims[1];j++) {
       out[j]=0;
     }
@@ -48,6 +48,7 @@ static PyObject *
     data_vals = (void *) data->data;
     fracb_vals = (double *) fracb->data;
     fprintf(stderr,"type: %c\n",type);
+    #pragma omp parallel for private(j)
     for (i=0;i<nindep;i++) {
       if (type=='d') {
         for (j=0;j<S->dimensions[0];j++) {
@@ -71,7 +72,6 @@ static PyObject *
       }
       else {
         fprintf(stderr,"unsupported type: %c\n" , type);
-        return NULL;
       }
       for (j=0;j<n2;j++) {
         if (fracb_vals[j]>0.) out[i*n2+j]=out[i*n2+j]/fracb_vals[j];

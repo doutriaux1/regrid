@@ -4,6 +4,7 @@ import sys, os
 import numpy
 import MV2
 import argparse
+import acme_regridder._regrid
 value = 0
 cdms2.setNetcdfShuffleFlag(value) ## where value is either 0 or 1
 cdms2.setNetcdfDeflateFlag(value) ## where value is either 0 or 1
@@ -65,14 +66,10 @@ class WeightFileRegridder:
     input_id=input.id
     input=input.filled()
     sh=input.shape
-    n=1.
-    for i in sh[:-1]:
-      n*=i
-    input.shape=(n,sh[-1])
-    dest_field=numpy.zeros((n,self.n_b,))
-    for i in range(self.n_s):
-      dest_field[:,self.row[i]]=dest_field[:,self.row[i]]+self.S[i]*input[:,self.col[i]]
-    dest_field = numpy.where(numpy.greater(self.frac_b,0.),dest_field/self.frac_b,dest_field)
+    #dest_field=numpy.zeros((n,self.n_b,))
+    dest_field = acme_regridder._regrid.apply_weights(input,self.S,self.row,self.col,self.frac_b)
+    print "DEST FIELD",dest_field.shape
+    dest_field = dest_field.astype(input.dtype)
     dest_field=numpy.ma.masked_where(self.mask_b,dest_field)
     if self.regular:
       sh2=list(sh[:-1])#+[len(self.lats),len(self.lons)]

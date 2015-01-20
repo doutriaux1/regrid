@@ -1,3 +1,4 @@
+#/usr/bin/env python
 # Import regrid2 package for regridder functions
 import cdms2 
 import sys, os
@@ -5,24 +6,6 @@ import numpy
 import MV2
 import argparse
 import acme_regridder._regrid
-value = 0
-cdms2.setNetcdfShuffleFlag(value) ## where value is either 0 or 1
-cdms2.setNetcdfDeflateFlag(value) ## where value is either 0 or 1
-cdms2.setNetcdfDeflateLevelFlag(value) ## where value is a integer between 0 and 9 included
-
-data_pth = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]),"..","data"))
-fweights = os.path.join(data_pth,"ne120_to_t85.wgts.nc")
-## Create the parser for user input
-parser = argparse.ArgumentParser(description='Regrid variables in a file using a weight file')
-parser.add_argument("--weight-file","-w",dest="weights",help="path to weight file",default=fweights)
-parser.add_argument("--output","-o",dest="out",help="output file")
-parser.add_argument("--input","-i","-f","--file",dest="file",help="input file to process",required=True)
-parser.add_argument("--var","-v",dest="var",help="variable to process (default is all variable with 'ncol' dimension")
-
-args = parser.parse_args(sys.argv[1:])
-
-print args
-# Read the weights file
 
 class WeightFileRegridder:
   def __init__(self,weightFile,toRegularGrid=True):
@@ -83,27 +66,45 @@ class WeightFileRegridder:
         dest_field.setAxis(i,axes[i])
     return dest_field
 
+if __name__=="__main__":
+  value = 0
+  cdms2.setNetcdfShuffleFlag(value) ## where value is either 0 or 1
+  cdms2.setNetcdfDeflateFlag(value) ## where value is either 0 or 1
+  cdms2.setNetcdfDeflateLevelFlag(value) ## where value is a integer between 0 and 9 included
 
-regdr = WeightFileRegridder(args.weights)
+  data_pth = os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]),"..","data"))
+  fweights = os.path.join(data_pth,"ne120_to_t85.wgts.nc")
+  ## Create the parser for user input
+  parser = argparse.ArgumentParser(description='Regrid variables in a file using a weight file')
+  parser.add_argument("--weight-file","-w",dest="weights",help="path to weight file",default=fweights)
+  parser.add_argument("--output","-o",dest="out",help="output file")
+  parser.add_argument("--input","-i","-f","--file",dest="file",help="input file to process",required=True)
+  parser.add_argument("--var","-v",dest="var",help="variable to process (default is all variable with 'ncol' dimension")
 
-f=cdms2.open(args.file)
+  args = parser.parse_args(sys.argv[1:])
 
-if args.out is None:
-  onm = ".".join(args.file.split(".")[:-1])+"_regrid.nc"
-else:
-  onm = args.out
-fo=cdms2.open(onm,"w")
-if args.var is not None:
-  vars=[args.var,]
-else:
-  vars= f.variables.keys()
-for v in vars:
-  V=f[v]
-  if "ncol" in V.getAxisIds():
-    print "Processing:",V.id
-    dat2 = regdr.regrid(V())
-    fo.write(dat2,dtype=V.dtype)
-    fo.sync()
+  print args
+  # Read the weights file
+  regdr = WeightFileRegridder(args.weights)
+
+  f=cdms2.open(args.file)
+
+  if args.out is None:
+    onm = ".".join(args.file.split(".")[:-1])+"_regrid.nc"
+  else:
+    onm = args.out
+  fo=cdms2.open(onm,"w")
+  if args.var is not None:
+    vars=[args.var,]
+  else:
+    vars= f.variables.keys()
+  for v in vars:
+    V=f[v]
+    if "ncol" in V.getAxisIds():
+      print "Processing:",V.id
+      dat2 = regdr.regrid(V())
+      fo.write(dat2,dtype=V.dtype)
+      fo.sync()
   else:
     print "Rewriting as is:",V.id
     try:
@@ -111,6 +112,4 @@ for v in vars:
       fo.sync()
     except:
       pass
-fo.close()
-
-
+  fo.close()

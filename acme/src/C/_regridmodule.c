@@ -29,6 +29,7 @@ static PyObject *
       nindep*=data->dimensions[i];
     }
     /* Construct dest array */
+    int n1 = data->dimensions[data->nd-1];
     int n2 = fracb->dimensions[0];
     npy_intp newdims[2];
     newdims[0]=nindep;
@@ -50,22 +51,22 @@ static PyObject *
     for (i=0;i<nindep;i++) {
       if (type=='d') {
         for (j=0;j<S->dimensions[0];j++) {
-          out[i*n2+row_vals[j]] = out[i*n2+row_vals[j]] + S_vals[j]*((double *)data_vals)[i*n2+col_vals[j]];
+          out[i*n2+row_vals[j]] = out[i*n2+row_vals[j]] + S_vals[j]*((double *)data_vals)[i*n1+col_vals[j]];
         }
       }
       else if (type=='f') {
         for (j=0;j<S->dimensions[0];j++) {
-          out[i*n2+row_vals[j]] = out[i*n2+row_vals[j]] + S_vals[j]*((float *)data_vals)[i*n2+col_vals[j]];
+          out[i*n2+row_vals[j]] = out[i*n2+row_vals[j]] + S_vals[j]*((float *)data_vals)[i*n1+col_vals[j]];
         }
       }
       else if (type=='i') {
         for (j=0;j<S->dimensions[0];j++) {
-          out[i*n2+row_vals[j]] = out[i*n2+row_vals[j]] + S_vals[j]*((int *)data_vals)[i*n2+col_vals[j]];
+          out[i*n2+row_vals[j]] = out[i*n2+row_vals[j]] + S_vals[j]*((int *)data_vals)[i*n1+col_vals[j]];
         }
       }
       else if (type=='l') {
         for (j=0;j<S->dimensions[0];j++) {
-          out[i*n2+row_vals[j]] = out[i*n2+row_vals[j]] + S_vals[j]*((long *)data_vals)[i*n2+col_vals[j]];
+          out[i*n2+row_vals[j]] = out[i*n2+row_vals[j]] + S_vals[j]*((long *)data_vals)[i*n1+col_vals[j]];
         }
       }
       else {

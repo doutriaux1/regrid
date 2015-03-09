@@ -1,4 +1,4 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 # Import regrid2 package for regridder functions
 import cdms2 
 import sys, os
